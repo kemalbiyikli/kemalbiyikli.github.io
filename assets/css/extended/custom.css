@@ -190,3 +190,9 @@ code, pre, kbd { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Me
   .home-info .entry-header h1 { font-size: 30px; }
   .post-title { font-size: 28px; }
 }
+
+/* Görsel büyütme (lightbox) */
+#lightbox { position: fixed; inset: 0; z-index: 1000; display: none; overflow: auto; background: rgba(0,0,0,.88); cursor: zoom-out; }
+#lightbox.open { display: flex; }
+#lightbox img { margin: auto; max-width: 95vw; max-height: 95vh; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.5); cursor: zoom-in; }
+#lightbox.zoomed img { max-width: none; max-height: none; cursor: zoom-out; }
