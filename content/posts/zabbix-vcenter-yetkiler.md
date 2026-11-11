@@ -68,13 +68,23 @@ Bu üç parça bir araya geldiğinde Zabbix’in VMware template’i  eksiksiz v
 
 ## Kaynaklar
 
-**Groups in the vCenter Single Sign-On Domain** `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere-sdks-tools/8-0/groups-in-the-vsphere-local-domain.html`
+**Groups in the vCenter Single Sign-On Domain** 
 
-**Add a User to the SystemConfiguration.BashShellAdministrators Group** `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vcenter-configuration/configuring-vcenter-server-using-the-vsphere-client/add-a-user-to-the-systemconfiguration-bashshelladministrators-group.html`
+`https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere-sdks-tools/8-0/groups-in-the-vsphere-local-domain.html`
 
-**Using vCenter Server Global Permissions** `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-security/vsphere-permissions-and-user-management-tasks/global-permissions.html`
+**Add a User to the SystemConfiguration.BashShellAdministrators Group**
 
-**Understanding Authorization in vSphere** `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-security/vsphere-permissions-and-user-management-tasks/understanding-authorization-in-vsphere.html`
+`https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vcenter-configuration/configuring-vcenter-server-using-the-vsphere-client/add-a-user-to-the-systemconfiguration-bashshelladministrators-group.html`
 
-**Zabbix VMware entegrasyon dokümantasyonu** `https://www.zabbix.com/integrations/vmware`
+**Using vCenter Server Global Permissions**
+
+`https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-security/vsphere-permissions-and-user-management-tasks/global-permissions.html`
+
+**Understanding Authorization in vSphere**
+
+`https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-security/vsphere-permissions-and-user-management-tasks/understanding-authorization-in-vsphere.html`
+
+**Zabbix VMware entegrasyon dokümantasyonu**
+
+`https://www.zabbix.com/integrations/vmware`
 
