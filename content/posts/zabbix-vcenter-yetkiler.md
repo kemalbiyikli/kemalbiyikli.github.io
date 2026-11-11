@@ -1,7 +1,7 @@
 ---
 title: "Zabbix ile vCenter Monitoring: Hangi Kullanıcı Hangi Gruplarda Olmalı?"
 date: 2026-07-15T00:00:00
-draft: true
+draft: false
 tags:
   - VMware
   - vCenter
