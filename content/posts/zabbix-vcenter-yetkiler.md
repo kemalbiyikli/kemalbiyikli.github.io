@@ -1,9 +1,13 @@
 ---
 title: "Zabbix ile vCenter Monitoring: Hangi Kullanıcı Hangi Gruplarda Olmalı?"
-date: "2026-07-15T00:00:00"
-slug: "zabbix-ile-vcenter-monitoring-hangi-kullanici-hangi-gruplarda-olmali"
-tags: ["VMware", "vCenter", "Zabbix", "Monitoring"]
+date: 2026-07-15T00:00:00
 draft: true
+tags:
+  - VMware
+  - vCenter
+  - Zabbix
+  - Monitoring
+slug: zabbix-ile-vcenter-monitoring-hangi-kullanici-hangi-gruplarda-olmali
 ---
 Zabbix üzerinden bir vCenter ortamını izlerken kullanılan servis hesabına ne kadar yetki verileceği sık karışan bir konu. “Read-Only rol yeterli” diye başlıyoruz, sonra bazı item’lar sürekli hata veriyor, çaresizlikle Administrator veriyoruz ve her şey düzeliyor ki bu da izleme hesabı için gereğinden fazla yetki demek. Peki aslında ihtiyacımız olan yetkiler neler?
 
@@ -14,17 +18,17 @@ vCenter’da aslında birbirinden bağımsız iki ayrı yetkilendirme sistemi va
 1. **Global Permissions / Roles** — Inventory kısmını, yani VM, host, cluster, datastore, folder gibi **inventory objelerine** erişimi kontrol eder.
 2. **SSO domain grupları** **WAMI** — Appliance’ın kendi iç servislerini; health, sertifikalar, backup durumu gibi bilgileri kontrol eden, tamamen ayrı bir yetki katmanı.
 
-VMware’in kendi dokümantasyonu bunu açıkça belirtiyor: Global Permissions vsphere.local domain’i genelinde replike edilse de, **vsphere.local grupları tarafından yönetilen servisler için yetki sağlamaz.** Yani Global Permissions’a Read-Only atamak, appliance health verisine erişim sağlamıyor.
+VMware’in kendi dokümantasyonu bunu açıkça belirtiyor: vCenter üzerinde Global Permissions'a Read Only yetkisi envanter'e tam okuma izni vermesine rağmen appliance health verisine erişim sağlamıyor. 
 
 ## Gereken üç grup
 
 ### 1. Global Permissions → Read-Only rolü
 
-**Nereye bakar:** vCenter inventory hiyerarşisi — VM’ler, ESXi host’lar, cluster’lar, datastore’lar, resource pool’lar, folder’lar.
+**Nereye bakar:** vCenter envanteri; VM’ler, ESXi host’lar, cluster’lar, datastore’lar, resource pool’lar, folder’lar.
 
 **Nasıl atanır:** Administration → Access Control → Global Permissions → kullanıcıyı/grubu ekle → Role: **Read-only** → Propagate to children işaretli.
 
-**Zabbix’e sağladığı:** VM ve host envanteri, CPU/memory/disk/network sayaçları, VM discovery, datastore kapasite bilgisi — “VMware Hypervisor” ve “VMware Guest” template’lerinin çoğu item’ı bu yetkiyle çalışır.
+**Zabbix’e sağladığı:** VM ve host envanteri, CPU/memory/disk/network metrikleri, folder, datastore kapasite bilgisi vb.
 
 ### 2. SSO Group: SystemConfiguration.ReadOnly
 
@@ -44,11 +48,13 @@ VMware’in kendi dokümantasyonu bunu açıkça belirtiyor: Global Permissions 
 
 ## Özet tablo
 
+
 | Grup / Rol | Yetki katmanı | Kapsadığı veri | Atandığı yer |
-| --- | --- | --- | --- |
+| ------------------------------ | ------------------ | -------------------------------------------------------- | ------------------------------------------------ |
 | Global Permissions → Read-Only | vSphere RBAC | VM, host, datastore, cluster envanteri ve sayaçları | Administration → Global Permissions |
 | SystemConfiguration.ReadOnly | SSO built-in group | Appliance health, servis durumları, sertifikalar, backup | Administration → SSO → Users and Groups → Groups |
 | vStatsGroup | SSO built-in group | Detaylı performans istatistikleri (vStats) | Administration → SSO → Users and Groups → Groups |
+
 
 ## Pratik not
 
@@ -67,15 +73,15 @@ Aşağıdaki resmi Broadcom/VMware TechDocs sayfaları, yazıdaki bilgilerin day
 
 1. **Groups in the vCenter Single Sign-On Domain** — vsphere.local domain’indeki tüm önceden tanımlı (built-in) grupları ve her birinin ne işe yaradığını listeleyen ana referans tablo. `SystemConfiguration.ReadOnly` ve `vStatsGroup` satırları burada resmi olarak tanımlanıyor. `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere-sdks-tools/8-0/groups-in-the-vsphere-local-domain.html` İlgili tablo satırları (sayfadan birebir):
 
-   *SystemConfiguration.ReadOnly*: “Members of this group can access vCenter Server Appliance read-only operations under Appliance Management.”
+  *SystemConfiguration.ReadOnly*: “Members of this group can access vCenter Server Appliance read-only operations under Appliance Management.”
 
    *vStatsGroup*: “This group is used for vStats collection.”
 
    *SystemConfiguration.Administrators*: “Members of the SystemConfiguration.Administrators group can view and manage the system configuration in the vCenter Server Management Interface running on port 5480…”
-
 2. **Add a User to the SystemConfiguration.BashShellAdministrators Group** — SystemConfiguration.* grup ailesine üye ekleme adımlarının (Administration → Single Sign On → Users and Groups → Groups → ilgili grup → Edit) uygulamalı örneği. Aynı adımlar SystemConfiguration.ReadOnly için de geçerli. `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vcenter-configuration/configuring-vcenter-server-using-the-vsphere-client/add-a-user-to-the-systemconfiguration-bashshelladministrators-group.html`
 3. **Using vCenter Server Global Permissions** — Global Permissions’ın kapsamının vCenter inventory hiyerarşisi (VM, host, datastore, tag, content library) ile sınırlı olduğunu, ayrı bir global root objesi üzerinden uygulandığını anlatan bölüm. `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-security/vsphere-permissions-and-user-management-tasks/global-permissions.html`
 4. **Understanding Authorization in vSphere** — Global Permissions ile SSO grup üyeliğinin iki ayrı yetkilendirme modeli olduğunu, birinin inventory objelerini, diğerinin SSO tarafından yönetilen servisleri kapsadığını açıklayan kavramsal bölüm. `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-security/vsphere-permissions-and-user-management-tasks/understanding-authorization-in-vsphere.html`
 5. **Zabbix VMware entegrasyon dokümantasyonu** — ayrı bir monitoring hesabı kullanılacaksa hesabın `SystemConfiguration.ReadOnly` ve `vStatsGroup` gruplarının üyesi olması gerektiğini belirten resmi Zabbix template dokümantasyonu. `https://www.zabbix.com/integrations/vmware`
 
 > Not: Broadcom TechDocs URL’leri sürüm bazlı (`/8-0/`, `/7-0/`, `/9-0/` gibi) yapılandırılıyor; kendi vCenter sürümünüze göre sayfadaki sürüm seçiciden doğru dokümana geçebilirsiniz.
+
