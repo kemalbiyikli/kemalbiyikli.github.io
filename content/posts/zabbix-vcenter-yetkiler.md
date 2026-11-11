@@ -32,11 +32,11 @@ VMware’in kendi dokümantasyonu bunu açıkça belirtiyor: vCenter üzerinde G
 
 ### 2. SSO Group: SystemConfiguration.ReadOnly
 
-**Nereye bakar:** Appliance Management API (VAMI’nin arkasındaki `/api/appliance/...` endpoint’leri). vCenter servislerinin durumu (vpxd, vpostgres, vsphere-ui vb.), appliance sertifika süreleri, backup job geçmişi, disk/CPU/memory kullanımı — appliance’ın **kendi işletim sistemi seviyesindeki** sağlık durumu.
+**Nereye bakar:** Appliance Management API (VAMI). vCenter servislerinin durumu (vpxd, vpostgres, vsphere-ui vb.), appliance sertifika süreleri, Disk/CPU/Memory kullanımı, appliance’ın **kendi işletim sistemi seviyesindeki** sağlık durumu.
 
 **Nasıl atanır:** Administration → Single Sign-On → Users and Groups → Groups sekmesi → domain seç → `SystemConfiguration.ReadOnly` grubunu bul → kullanıcıyı Members olarak ekle.
 
-**Zabbix’e sağladığı:** “Overall Health VC State” gibi appliance health item’ları. Bu grup olmadan, Global Permissions Read-Only ne kadar geniş verilirse verilsin, appliance health sorgusu `403 UNAUTHORIZED` döner — çünkü sorulan kaynak farklı bir yetki alanında.
+**Zabbix’e sağladığı:** “Overall Health VC State” gibi appliance health item’ları. Bu grup olmadan, Global Permissions Read-Only ne kadar geniş verilirse verilsin, appliance health sorgusuna yanıt alınamaz.
 
 ### 3. SSO Group: vStatsGroup
 
@@ -44,44 +44,37 @@ VMware’in kendi dokümantasyonu bunu açıkça belirtiyor: vCenter üzerinde G
 
 **Nasıl atanır:** Aynı ekrandan — Groups sekmesinde `vStatsGroup`‘u bulup kullanıcıyı Members olarak ekleyin.
 
-**Zabbix’e sağladığı:** Zabbix’in resmi VMware entegrasyon dokümantasyonu, ayrı bir monitoring hesabı kullanılacaksa bu hesabın hem SystemConfiguration.ReadOnly hem de vStatsGroup üyesi olması gerektiğini açıkça belirtiyor — ikisi birlikte istendiği için performans verisi eksiksiz toplanabiliyor.
+**Zabbix’e sağladığı:** Zabbix’in resmi VMware entegrasyon dokümantasyonu, ayrı bir monitoring hesabı kullanılacaksa bu hesabın hem SystemConfiguration.ReadOnly hem de vStatsGroup üyesi olması gerektiğini  belirtiyor, ikisi birlikte sağlandığında performans verisinin eksiksiz toplanabileceği belirtiliyor.
 
 ## Özet tablo
 
 
 | Grup / Rol | Yetki katmanı | Kapsadığı veri | Atandığı yer |
-| ------------------------------ | ------------------ | -------------------------------------------------------- | ------------------------------------------------ |
-| Global Permissions → Read-Only | vSphere RBAC | VM, host, datastore, cluster envanteri ve sayaçları | Administration → Global Permissions |
-| SystemConfiguration.ReadOnly | SSO built-in group | Appliance health, servis durumları, sertifikalar, backup | Administration → SSO → Users and Groups → Groups |
+| ------------------------------ | ------------------ | ---------------------------------------------------- | ------------------------------------------------ |
+| Global Permissions → Read-Only | vSphere RBAC | VM, Host, Datastore, Cluster gibi envanter item'ları | Administration → Global Permissions |
+| SystemConfiguration.ReadOnly | SSO built-in group | Appliance health, servis durumları, sertifikalar, | Administration → SSO → Users and Groups → Groups |
 | vStatsGroup | SSO built-in group | Detaylı performans istatistikleri (vStats) | Administration → SSO → Users and Groups → Groups |
 
 
-## Pratik not
+## Notlar
 
-Bu üç atama birbirini geçersiz kılmaz, üst üste eklenir. Bir izleme hesabı için doğru pratik:
+Bu üç atama üst üste eklenir ve farklı amaçlara hizmet ederler.
 
-- Administrator rolü **vermeyin** — gereğinden fazla yetki, güvenlik açısından gereksiz risk.
-- Yukarıdaki üç grubu/rolü ayrı ayrı atayın.
-- SSO grup üyelikleri Global Permissions ekranında **görünmez** — bunları doğrulamak için tek yer Administration → SSO → Users and Groups → Groups → ilgili grup → Members sekmesi.
-- SSO grup üyeliği bazı vCenter sürümlerinde hemen değil, birkaç dakika içinde propagate olabiliyor; test etmeden önce biraz bekleyin.
+izleme için **Administrator** rolü vermeyin gereğinden fazla yetki her zaman risktir.
 
-Bu üç parça bir araya geldiğinde Zabbix’in VMware template’i (inventory + appliance health + performans istatistikleri) eksiksiz ve en az yetki prensibiyle çalışır.
+SSO grup üyelikleri Global Permissions ekranında **görünmez** — bunları doğrulamak için tek yer Administration → SSO → Users and Groups → Groups → ilgili grup → Members sekmesi.
+
+Bu üç parça bir araya geldiğinde Zabbix’in VMware template’i  eksiksiz ve en az yetki prensibiyle çalışır.
 
 ## Kaynaklar
 
-Aşağıdaki resmi Broadcom/VMware TechDocs sayfaları, yazıdaki bilgilerin dayandığı birincil kaynaklardır (vSphere 8.0 dokümantasyon seti; sürüm seçici üzerinden 7.0/9.0 gibi diğer sürümlere de geçilebilir):
+**Groups in the vCenter Single Sign-On Domain** `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere-sdks-tools/8-0/groups-in-the-vsphere-local-domain.html`
 
-1. **Groups in the vCenter Single Sign-On Domain** — vsphere.local domain’indeki tüm önceden tanımlı (built-in) grupları ve her birinin ne işe yaradığını listeleyen ana referans tablo. `SystemConfiguration.ReadOnly` ve `vStatsGroup` satırları burada resmi olarak tanımlanıyor. `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere-sdks-tools/8-0/groups-in-the-vsphere-local-domain.html` İlgili tablo satırları (sayfadan birebir):
+**Add a User to the SystemConfiguration.BashShellAdministrators Group** `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vcenter-configuration/configuring-vcenter-server-using-the-vsphere-client/add-a-user-to-the-systemconfiguration-bashshelladministrators-group.html`
 
-  *SystemConfiguration.ReadOnly*: “Members of this group can access vCenter Server Appliance read-only operations under Appliance Management.”
+**Using vCenter Server Global Permissions** `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-security/vsphere-permissions-and-user-management-tasks/global-permissions.html`
 
-   *vStatsGroup*: “This group is used for vStats collection.”
+**Understanding Authorization in vSphere** `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-security/vsphere-permissions-and-user-management-tasks/understanding-authorization-in-vsphere.html`
 
-   *SystemConfiguration.Administrators*: “Members of the SystemConfiguration.Administrators group can view and manage the system configuration in the vCenter Server Management Interface running on port 5480…”
-2. **Add a User to the SystemConfiguration.BashShellAdministrators Group** — SystemConfiguration.* grup ailesine üye ekleme adımlarının (Administration → Single Sign On → Users and Groups → Groups → ilgili grup → Edit) uygulamalı örneği. Aynı adımlar SystemConfiguration.ReadOnly için de geçerli. `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vcenter-configuration/configuring-vcenter-server-using-the-vsphere-client/add-a-user-to-the-systemconfiguration-bashshelladministrators-group.html`
-3. **Using vCenter Server Global Permissions** — Global Permissions’ın kapsamının vCenter inventory hiyerarşisi (VM, host, datastore, tag, content library) ile sınırlı olduğunu, ayrı bir global root objesi üzerinden uygulandığını anlatan bölüm. `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-security/vsphere-permissions-and-user-management-tasks/global-permissions.html`
-4. **Understanding Authorization in vSphere** — Global Permissions ile SSO grup üyeliğinin iki ayrı yetkilendirme modeli olduğunu, birinin inventory objelerini, diğerinin SSO tarafından yönetilen servisleri kapsadığını açıklayan kavramsal bölüm. `https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-security/vsphere-permissions-and-user-management-tasks/understanding-authorization-in-vsphere.html`
-5. **Zabbix VMware entegrasyon dokümantasyonu** — ayrı bir monitoring hesabı kullanılacaksa hesabın `SystemConfiguration.ReadOnly` ve `vStatsGroup` gruplarının üyesi olması gerektiğini belirten resmi Zabbix template dokümantasyonu. `https://www.zabbix.com/integrations/vmware`
-
-> Not: Broadcom TechDocs URL’leri sürüm bazlı (`/8-0/`, `/7-0/`, `/9-0/` gibi) yapılandırılıyor; kendi vCenter sürümünüze göre sayfadaki sürüm seçiciden doğru dokümana geçebilirsiniz.
+**Zabbix VMware entegrasyon dokümantasyonu** `https://www.zabbix.com/integrations/vmware`
 
